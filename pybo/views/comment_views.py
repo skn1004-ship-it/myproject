@@ -18,7 +18,10 @@ def create_question(question_id):
         comment = Comment(user=g.user, content=form.content.data, create_date=datetime.now(), question=question)
         db.session.add(comment)
         db.session.commit()
-        return redirect(url_for('question.detail', question_id=question_id))
+        # return redirect(url_for('question.detail', question_id=question_id))
+        return redirect('{}#comment_{}'.format(
+            url_for('question.detail', question_id=question_id), comment.id
+        ))
     return render_template('comment/comment_form.html', form=form)
 
 # 질문 댓글 수정
@@ -35,7 +38,10 @@ def modify_question(comment_id):
             form.populate_obj(comment) # 이름이 같은 속성을 자동으로 찾아 값을 복사. 폼 필드 이름과 모델의 속성 이름이 같아야함
             comment.modify_date = datetime.now() # 수정일시 기록
             db.session.commit()
-            return redirect(url_for('question.detail', question_id=comment.question.id))
+            # return redirect(url_for('question.detail', question_id=comment.question.id))
+            return redirect('{}#comment_{}'.format(
+                url_for('question.detail', question_id=comment.question.id), comment.id
+            ))
     else:
         form = CommentForm(obj=comment)
     return render_template('comment/comment_form.html', form=form)
@@ -61,7 +67,7 @@ def create_answer(answer_id):
     answer = Answer.query.get_or_404(answer_id)
     if request.method == 'POST' and form.validate_on_submit():
         comment = Comment(user=g.user, content=form.content.data,create_date=datetime.now(), answer=answer)
-        db.session.add(Comment)
+        db.session.add(comment)
         db.session.commit()
         return redirect(url_for('question.detail', question_id=answer.question.id))
     return render_template('comment/comment_form.html', form=form)
@@ -81,9 +87,9 @@ def modify_answer(comment_id):
             comment.modify_date = datetime.now()
             db.session.commit()
             return redirect(url_for('question.detail', question_id=comment.answer.question.id))
-        else:
-            form = CommentForm(obj=comment)
-        return render_template('comment/comment_form.html', form=form)
+    else:
+        form = CommentForm(obj=comment)
+    return render_template('comment/comment_form.html', form=form)
 
 # 답변 댓글 삭제
 @bp.route('delete/answer/<int:comment_id>/')
@@ -96,4 +102,4 @@ def delete_answer(comment_id):
     else:
         db.session.delete(comment)
         db.session.commit()
-    return redirect(url_for('question.drtail', question_id=question_id))
+    return redirect(url_for('question.detail', question_id=question_id))

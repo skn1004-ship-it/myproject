@@ -4,7 +4,19 @@
     <h2 class="border-bottom py-2">{{ question.subject }}</h2>
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div>
+            <!-- <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div> -->
+            <div class="card-text">{{ question.content | trim | markdown }}</div>
+
+            <!-- === 260730 추가 시작 === -->
+
+             {% if question.image_path %}
+            <div class="my-3">
+                <img src="{{ url_for('static', filename=question.image_path) }}" alt="첨부 이미지" style="max-width: 100%; height: auto;" class="img-thumbnail">
+            </div>
+            {% endif %}
+            
+            <!-- === 260730 추가 끝 === -->
+
             <div class="d-flex justify-content-end">
                 <!-- 수정 일시 표시하기 -->
                 {% if question.modify_date %}
@@ -41,10 +53,14 @@
 
     # 답변 전용 댓글 출력 출력 루프 코드
     <div class="card my-3"> -->
+        <!-- 질문의 댓글 -->
         <div class="card-body ps-2">
             {% if question.comment_set|length > 0 %}
             <div class="mt-3">
                 {% for comment in question.comment_set %}
+                <!-- 질문 댓글 앵커 -->
+                <a name="comment_{{ comment.id}}"></a>
+
                 <div class="comment py-2 text-muted small border-top">
                     <span style="white-space: pre-line;">{{ comment.content }}</span>
                     <span>
@@ -75,11 +91,17 @@
         </div>
     </div>
 
+    <!-- 답변 -->
     <h5 class="border-bottom my-3 py-2">{{ question.answer_set|length }}개의 답변이 있습니다.</h5>
     {% for answer in question.answer_set %}
+    
+    <!-- 앵커 엘리먼트 -->
+    <a name = "answer_{{ answer.id}}"></a>
+
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div>
+            <!-- <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div> -->
+             <div class="card-text">{{ answer.content | trim | markdown}}</div>
             <div class="d-flex justify-content-end">
                 <!-- 수정 일시 표시하기 -->
                 {% if answer.modify_date %}
@@ -94,15 +116,22 @@
                     <div class="mb-2">answered at</div>
                     <div>{{ answer.create_date | datetime }}</div>
                 </div>
-            </div>
-            {% if g.user == answer.user %}
+            </div>            
+            
             <div class="my-3">
+                <!-- 질문 추천 버튼 만들기 -->
+                <a href="javascript:void(0)"
+                data-uri="{{ url_for('answer.vote', answer_id=answer.id) }}"
+                class="recommend btn btn-sm btn-outline-secondary">추천
+                    <span class="badge rounded-pill bg-success">{{ answer.voter|length }}</span>
+                </a>
+                {% if g.user == answer.user %}
                 <a href="{{ url_for('answer.modify', answer_id=answer.id) }}"
                     class="btn btn-sm btn-outline-secondary">수정</a>
                 <a href="javascript:void(0)" data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}"
                     class="delete btn btn-sm btn-outline-secondary">삭제</a>
-            </div>
-            {% endif %}
+                {% endif %}
+            </div>            
         </div>
     <!-- </div> -->
 
@@ -112,6 +141,10 @@
             {% if answer.comment_set|length >0 %}
             <div class="mt-3">
             {% for comment in answer.comment_set %}
+
+                <!-- 답변 댓글 앵커 -->
+                <a name="comment_{{ comment.id }}"></a>
+
                 <div class="comment py-2 text-muted small border-top">
                     <span style="white-space: pre-line;">{{ comment.content }}</span>
                     <span>

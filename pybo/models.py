@@ -23,8 +23,20 @@ class Question(db.Model):
     subject = db.Column(db.String(200), nullable = False)
     content = db.Column(db.Text(), nullable = False)
     create_date = db.Column(db.DateTime(), nullable = False)
+    
+    # === 260730 추가 시작 
+
+    # 업로드된 이미지 경로 추가
+    image_path = db.Column(db.String(200), nullable=True)
+
+    # 길이 제한이 없는 Text 타입 사용
+    image_path = db.Column(db.Text(), nullable=True)
+
+    # 260730 추가 끝 ===
+
     # 글쓴이 외래키 및 관계 설정 추가(기존 데이터 고려 nullable=True 우선허용)
     # user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=TRUE, server_default='1')
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     user = db.relationship('User', backref=db.backref('question_set'))
     # 추천인(다대다)_Question 모델과 User 모델을 다대다(Many-to-Many) 관계로 연결
